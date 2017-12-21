@@ -1,0 +1,18 @@
+use training;
+create table GST_TaxSlab_Employee( SlabId int primary key, SlabName varchar(10) not null, SlabPercentage decimal not null);
+alter table GST_TaxSlab_Employee alter column SlabPercentage decimal not null;
+create table Commodity_EmployeeId( CommodityId int primary key, CommodityName varchar not null, Description varchar, UnitPrice decimal not null, GST decimal not null, SlabId int not null foreign key references GST_TaxSlab_Employee(SlabId),);
+
+insert into GST_TaxSlab_Employee values(1,'Slab 1',12);insert into GST_TaxSlab_Employee values(2,'Slab 2',18);insert into GST_TaxSlab_Employee values(3,'Slab 1',13.0);
+select * from GST_TaxSlab_Employee;
+select * from Commodity_EmployeeId;
+gocreate PROCEDURE [dbo].[uspAddCommodity]   ( @CommodityId int, @CommodityName varchar(20), @Description varchar(30), @Price decimal, @Gst decimal, @SlabId int ) AS insert into Commodity_EmployeeId Values(@CommodityId,@CommodityName,@Description,@Price,@Gst,@SlabId) RETURN
+goalter procedure Calc_Gst @unit_price decimal,@slab_name varchar(20),@total decimal out asbegin declare @percent as numeric(18,2); print @slab_name; select @percent=SlabPercentage from GST_TaxSlab_Employee where SlabName=@slab_name; print @percent; select @total=@unit_price+((@unit_price*@percent)/100) from Commodity_EmployeeId; print @total;end
+gocreate procedure calc_percent @slab_name varchar(20) asbegin select SlabPercentage from GST_TaxSlab_Employee where SlabName=@slab_name; end; 
+goalter procedure calc_totalgst @percent decimal,@price decimal asbegin select @price+((@price*@percent)/100); --print @price+(@price*@percent)/100end;
+gocreate procedure calc_id @slabname varchar(20) asbegin select SlabId from GST_TaxSlab_Employee where SlabName=@slabname;end 
+exec calc_totalgst 10.00,13000;
+
+
+declare @temp as decimal;exec Calc_Gst 185000,'Slab 1',@temp;select @temp;
+
